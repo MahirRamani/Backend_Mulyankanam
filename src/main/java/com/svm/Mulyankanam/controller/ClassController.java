@@ -1,14 +1,14 @@
 package com.svm.Mulyankanam.controller;
 
+import com.svm.Mulyankanam.dto.BulkStudentResponse;
 import com.svm.Mulyankanam.model.Class;
+import com.svm.Mulyankanam.model.Student;
 import com.svm.Mulyankanam.service.ClassService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -24,7 +24,7 @@ public class ClassController {
     }
 
     @PostMapping("/assign-teacher")
-    public ResponseEntity assignTeacherToClass(@RequestParam("classId") String classId,@RequestParam("teacherId") String teacherId) {
+    public ResponseEntity assignTeacherToClass(@RequestParam("classId") String classId, @RequestParam("teacherId") String teacherId) {
         Class updatedClass = classService.assignTeacherToClass(classId, teacherId);
         if (updatedClass != null) {
             return ResponseEntity.ok(updatedClass);
@@ -32,4 +32,25 @@ public class ClassController {
             return ResponseEntity.notFound().build();
         }
     }
+
+    @PostMapping("/{classId}/students")
+    public ResponseEntity<Class> addStudentToClass(@PathVariable String classId, @RequestBody Student student) {
+        Class updatedClass = classService.addStudentToClass(classId, student);
+        return ResponseEntity.ok(updatedClass);
+    }
+
+    @PostMapping("/{classId}/students/bulk")
+    public ResponseEntity<BulkStudentResponse> addStudentsToClass(
+            @PathVariable String classId,
+            @RequestBody List<Student> students) {
+
+        BulkStudentResponse response = classService.addStudentsToClass(classId, students);
+
+        if (response.hasErrors()) {
+            return ResponseEntity.badRequest().body(response);
+        }
+
+        return ResponseEntity.ok(response);
+    }
+
 }
